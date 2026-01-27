@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/spf13/cobra"
 )
@@ -60,6 +61,60 @@ func initCmd() *cobra.Command {
 				return err
 			}
 			fmt.Fprintln(os.Stdout, "Created .skills.yaml")
+			return nil
+		},
+	}
+}
+
+func listCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "list",
+		Short: "List available skills in the central repository",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			globalCfg, err := loadGlobalConfig()
+			if err != nil {
+				return err
+			}
+			info, err := os.Stat(globalCfg.SkillRepository)
+			if err != nil {
+				return fmt.Errorf("stat skill repository %s: %w", globalCfg.SkillRepository, err)
+			}
+			if !info.IsDir() {
+				return fmt.Errorf("skill repository %s is not a directory", globalCfg.SkillRepository)
+			}
+
+			entries, err := os.ReadDir(globalCfg.SkillRepository)
+			if err != nil {
+				return fmt.Errorf("read skill repository %s: %w", globalCfg.SkillRepository, err)
+			}
+
+			skills := make([]string, 0, len(entries))
+			for _, entry := range entries {
+				path := filepath.Join(globalCfg.SkillRepository, entry.Name())
+				info, err := os.Stat(path)
+				if err != nil {
+					return fmt.Errorf("stat repository entry %s: %w", path, err)
+				}
+				if !info.IsDir() {
+					continue
+				}
+				hasSkillFile, err := dirHasSkillFile(path)
+				if err != nil {
+					return fmt.Errorf("inspect skill directory %s: %w", path, err)
+				}
+				if hasSkillFile {
+					skills = append(skills, entry.Name())
+				}
+			}
+
+			sort.Strings(skills)
+			if len(skills) == 0 {
+				fmt.Fprintf(os.Stdout, "No skills found in %s\n", globalCfg.SkillRepository)
+				return nil
+			}
+			for _, skill := range skills {
+				fmt.Fprintln(os.Stdout, skill)
+			}
 			return nil
 		},
 	}

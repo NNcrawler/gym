@@ -44,16 +44,14 @@ Example:
 The path to this directory is stored in a global config file:
 
 ```
-
-~/.gym
-
-````
+~/.gym.yaml
+```
 
 Example:
 
 ```yaml
 skillRepository: /Users/machine/skills
-````
+```
 
 ---
 
@@ -101,7 +99,7 @@ Examples:
 Build and install the CLI:
 
 ```
-go install github.com/nncrawler/gym/cmd/gym@latest
+go install github.com/nncrawler/gym@latest
 ```
 
 Ensure `~/go/bin` is in your PATH.
@@ -113,7 +111,7 @@ Ensure `~/go/bin` is in your PATH.
 Create the global config file:
 
 ```
-~/.gym
+~/.gym.yaml
 ```
 
 Example:
@@ -133,7 +131,19 @@ gym init
 ```
 
 * Prompts for agents used in the project
+* If `~/.gym.yaml` does not exist, prompts for the skill repository and creates it
 * Creates `.skills.yaml`
+
+---
+
+### List available skills
+
+```
+gym list
+```
+
+* Reads the central skill repository from `~/.gym.yaml`
+* Lists skill directories available to add
 
 ---
 

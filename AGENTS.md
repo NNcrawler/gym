@@ -88,9 +88,21 @@ Initializes a project for skill management.
 
 Behavior:
 
+* If `~/.gym.yaml` does not exist, prompts for the skill repository and creates it
 * Prompts the user to select which agents are used
 * Creates a `.skills.yaml` file with selecteds the selected agents
 * Does not copy any skills
+
+---
+
+### `gym list`
+
+Lists available skills from the central repository.
+
+Behavior:
+
+* Reads central repository path from `~/.gym.yaml`
+* Lists directories in the central repository
 
 ---
 
@@ -100,7 +112,7 @@ Adds a skill from the central repository into the project.
 
 Behavior:
 
-* Reads central repository path from `~/.gym`
+* Reads central repository path from `~/.gym.yaml`
 * Locates `<skill-name>` directory in the central repository
 * Copies the skill into the project:
 

@@ -207,3 +207,19 @@ func resolveSkillTarget(projectRoot, skillName, agent string, overrides map[stri
 	}
 	return filepath.Join(projectRoot, baseDir, skillName), nil
 }
+
+func dirHasSkillFile(dir string) (bool, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false, err
+	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if strings.EqualFold(entry.Name(), "skill.md") {
+			return true, nil
+		}
+	}
+	return false, nil
+}

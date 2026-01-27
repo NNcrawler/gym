@@ -71,6 +71,27 @@ func promptAgents(r io.Reader, w io.Writer) ([]string, error) {
 	return selected, nil
 }
 
+func promptSkillRepository(r io.Reader, w io.Writer) (string, error) {
+	fmt.Fprint(w, "Enter the central skill repository path: ")
+	reader := bufio.NewReader(r)
+	line, err := reader.ReadString('\n')
+	if err != nil && !errors.Is(err, io.EOF) {
+		return "", fmt.Errorf("read repository path: %w", err)
+	}
+	repo := strings.TrimSpace(line)
+	if repo == "" {
+		return "", errors.New("skill repository path is empty")
+	}
+	info, err := os.Stat(repo)
+	if err != nil {
+		return "", fmt.Errorf("stat skill repository: %w", err)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("skill repository %s is not a directory", repo)
+	}
+	return repo, nil
+}
+
 func parsePositiveInt(value string) (int, error) {
 	var n int
 	_, err := fmt.Sscanf(value, "%d", &n)

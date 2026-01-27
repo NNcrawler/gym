@@ -18,6 +18,24 @@ func initCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("resolve project root: %w", err)
 			}
+			globalExists, err := globalConfigExists()
+			if err != nil {
+				return err
+			}
+			if !globalExists {
+				repo, err := promptSkillRepository(os.Stdin, os.Stdout)
+				if err != nil {
+					return err
+				}
+				if err := writeGlobalConfig(GlobalConfig{SkillRepository: repo}); err != nil {
+					return err
+				}
+				globalPath, err := globalConfigPath()
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(os.Stdout, "Created %s\n", globalPath)
+			}
 			exists, err := projectConfigExists(projectRoot)
 			if err != nil {
 				return err

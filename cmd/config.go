@@ -17,16 +17,15 @@ type GlobalConfig struct {
 }
 
 type ProjectConfig struct {
-	Agents   []string                       `yaml:"agents"`
-	SkillMap map[string]map[string]string   `yaml:"skillMap"`
+	Agents   []string                     `yaml:"agents"`
+	SkillMap map[string]map[string]string `yaml:"skillMap"`
 }
 
 func loadGlobalConfig() (GlobalConfig, error) {
-	home, err := os.UserHomeDir()
+	path, err := globalConfigPath()
 	if err != nil {
-		return GlobalConfig{}, fmt.Errorf("resolve home directory: %w", err)
+		return GlobalConfig{}, err
 	}
-	path := filepath.Join(home, globalConfigName)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return GlobalConfig{}, fmt.Errorf("read global config %s: %w", path, err)
@@ -39,6 +38,18 @@ func loadGlobalConfig() (GlobalConfig, error) {
 		return GlobalConfig{}, errors.New("global config skillRepository is empty")
 	}
 	return cfg, nil
+}
+
+func writeGlobalConfig(cfg GlobalConfig) error {
+	path, err := globalConfigPath()
+	if err != nil {
+		return err
+	}
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return fmt.Errorf("marshal global config: %w", err)
+	}
+	return os.WriteFile(path, data, 0o644)
 }
 
 func loadProjectConfig(projectRoot string) (ProjectConfig, error) {
@@ -76,4 +87,27 @@ func projectConfigExists(projectRoot string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func globalConfigExists() (bool, error) {
+	path, err := globalConfigPath()
+	if err != nil {
+		return false, err
+	}
+	_, err = os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func globalConfigPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("resolve home directory: %w", err)
+	}
+	return filepath.Join(home, globalConfigName), nil
 }

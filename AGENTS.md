@@ -103,6 +103,7 @@ Behavior:
 
 * Reads central repository path from `~/.gym.yaml`
 * Lists directories in the central repository
+* Only includes directories containing a `SKILL.md`/`skill.md` file
 
 ---
 
@@ -123,6 +124,18 @@ Behavior:
     * A per-agent override path if specified
 * Registers the skill in `.skills.yaml`
 * Overwrites any existing project copy of the same skill
+
+---
+
+### `gym remove <skill-name>`
+
+Removes a registered skill from the project.
+
+Behavior:
+
+* Reads `.skills.yaml`
+* Removes the skill directory for each configured agent
+* Unregisters the skill from `.skills.yaml`
 
 ---
 

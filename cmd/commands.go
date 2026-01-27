@@ -174,6 +174,49 @@ func addCmd() *cobra.Command {
 	}
 }
 
+func removeCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "remove <skill-name>",
+		Short: "Remove a skill from the project",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			skillName := args[0]
+			projectRoot, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("resolve project root: %w", err)
+			}
+			projectCfg, err := loadProjectConfig(projectRoot)
+			if err != nil {
+				return err
+			}
+			if err := ensureSupportedAgents(projectCfg.Agents); err != nil {
+				return err
+			}
+			overrides, ok := projectCfg.SkillMap[skillName]
+			if !ok {
+				return fmt.Errorf("skill %q is not registered in .skills.yaml", skillName)
+			}
+
+			for _, agent := range projectCfg.Agents {
+				target, err := resolveSkillTarget(projectRoot, skillName, agent, overrides)
+				if err != nil {
+					return err
+				}
+				if err := os.RemoveAll(target); err != nil {
+					return fmt.Errorf("remove skill at %s: %w", target, err)
+				}
+				fmt.Fprintf(os.Stdout, "Removed %s for %s -> %s\n", skillName, agent, target)
+			}
+
+			delete(projectCfg.SkillMap, skillName)
+			if err := writeProjectConfig(projectRoot, projectCfg); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+}
+
 func syncCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "sync",

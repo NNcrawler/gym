@@ -144,6 +144,7 @@ gym list
 
 * Reads the central skill repository from `~/.gym.yaml`
 * Lists skill directories available to add
+* Only includes directories containing a `SKILL.md`/`skill.md` file
 
 ---
 
@@ -157,6 +158,17 @@ gym add <skill-name>
 * Copies it into the project for each configured agent
 * Registers the skill in `.skills.yaml`
 * Overwrites existing copies if present
+
+---
+
+### Remove a skill
+
+```
+gym remove <skill-name>
+```
+
+* Removes the skill from each configured agent directory
+* Unregisters the skill from `.skills.yaml`
 
 ---
 

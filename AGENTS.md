@@ -1,164 +1,50 @@
 # Agents.md
 
-This document defines the configuration format and behavior for the `gym` CLI, which manages synchronization of agent skills from a central local repository into individual projects.
+This document defines the configuration files and data contract used by the `gym` CLI.
 
-The CLI is distributed separately. The central skill repository is a directory on the local machine. Synchronization is strictly one-way:
+For installation, usage, and command behavior, refer to `README.md`.
 
-central skill repository → project
+## Tech Stack
 
-Local modifications to skills inside a project are overwritten during sync.
+- Language: Go
+- CLI framework: Cobra
+- Config format: YAML
+- YAML parser: `gopkg.in/yaml.v3`
+- File operations: Standard library only
+- Target platforms: macOS and Linux
 
 ---
 
-## Concepts
+## Global Configuration
 
-### Central Skill Repository
+The global config file is located at:
 
-A single directory on the local machine stores all skills.
-Each skill is a directory containing the files implementing that skill.
+~/.gym
 
-The path to the central repository is stored in a global config file:
-
-```
-~/.gym.yaml
-```
-
-### Global Config (`~/.gym.yaml`)
+Format:
 
 ```yaml
-skillRepository: /Users/machine/skills
-```
+skillRepository: /absolute/path/to/central/skills
+````
 
-Skills in the central repository do not contain agent-specific subdirectories.
-Agent-specific placement is handled by the CLI.
+`skillRepository` points to the local directory containing all centrally stored skills.
+Each skill is a directory inside this repository.
 
 ---
 
-### Project Skill Configuration
+## Project Configuration
 
-Each project using skills contains a `.skills.yaml` file at its root.
+Each project managed by `gym` contains a `.skills.yaml` file at its root.
+
 This file declares:
 
 * Which agents are used in the project
-* Which skills are added
-* Optional per-agent custom target directories
-
-### Example `.skills.yaml`
-
-```yaml
-agents:
-  - kilo-code
-  - codex
-
-skillMap:
-  go-app-configuration:
-    kilo-code: .kilocode/skills-code/go-app-configuration
-```
-
-If a per-agent path override is not provided, the CLI uses the default directory for that agent.
+* Which skills are installed
+* Optional per-agent custom installation paths
 
 ---
 
-## Default Agent Skill Directories
-
-Each supported agent has a default directory inside a project where skills are placed. Defaults are maintained in the CLI codebase.
-
-Examples:
-
-* `kilo-code` → `.kilocode/skills/`
-* `codex` → `.codex/skills/`
-
----
-
-## CLI
-
-Executable name:
-
-```
-gym
-```
-
----
-
-## Commands
-
-### `gym init`
-
-Initializes a project for skill management.
-
-Behavior:
-
-* If `~/.gym.yaml` does not exist, prompts for the skill repository and creates it
-* Prompts the user to select which agents are used
-* Creates a `.skills.yaml` file with selecteds the selected agents
-* Does not copy any skills
-
----
-
-### `gym list`
-
-Lists available skills from the central repository.
-
-Behavior:
-
-* Reads central repository path from `~/.gym.yaml`
-* Lists directories in the central repository
-* Only includes directories containing a `SKILL.md`/`skill.md` file
-
----
-
-### `gym add <skill-name>`
-
-Adds a skill from the central repository into the project.
-
-Behavior:
-
-* Reads central repository path from `~/.gym.yaml`
-* Locates `<skill-name>` directory in the central repository
-* Copies the skill into the project:
-
-  * For each configured agent
-  * Into either:
-
-    * The agent default skill directory, or
-    * A per-agent override path if specified
-* Registers the skill in `.skills.yaml`
-* Overwrites any existing project copy of the same skill
-
----
-
-### `gym remove <skill-name>`
-
-Removes a registered skill from the project.
-
-Behavior:
-
-* Reads `.skills.yaml`
-* Removes the skill directory for each configured agent
-* Unregisters the skill from `.skills.yaml`
-
----
-
-### `gym sync`
-
-Synchronizes all registered skills.
-
-Behavior:
-
-* Reads `.skills.yaml`
-* For each listed skill:
-
-  * Copies from the central repository
-  * Places into agent-specific directories
-  * Overwrites existing project copies
-
-Local modifications in project skill directories are overwritten without conflict resolution.
-
----
-
-## Data Model
-
-### `.skills.yaml`
+## `.skills.yaml` Format
 
 ```yaml
 agents:
@@ -167,30 +53,42 @@ agents:
 
 skillMap:
   <skill-name>:
-    <agent-name>: <optional custom path>
+    <agent-name>: <optional custom relative path>
 ```
 
-If an agent entry is missing under a skill, the default directory for that agent is used.
+### Example
+
+```yaml
+agents:
+  - kilo-code
+  - codex
+
+skillMap:
+  go-app-configuration:
+    kilo-code: .kilocode/custom-skills/go-app-configuration
+```
+
+If an agent entry is missing under a skill, the CLI installs the skill into that agent’s default directory.
 
 ---
 
-## Supported Agents
+## Default Agent Directories
 
-The CLI maintains an internal registry of supported agents and their default skill directories. Adding new agents requires updating the CLI codebase.
+Default installation directories for each supported agent are maintained internally in the CLI codebase.
 
----
+Examples:
 
-## Non-Goals
-
-* Two-way synchronization
-* Conflict resolution
-* Skill version pinning
-* Remote repositories
+* kilo-code → `.kilocode/skills/`
+* codex → `.codex/skills/`
 
 ---
 
-## Tech
+## Sync Model
 
-Tech stack
-- Golang
-- Cobra for CLI https://github.com/spf13/cobra
+The configuration assumes a one-way sync model:
+
+central skill repository → project
+
+Local modifications to installed skills are overwritten during synchronization.
+
+---

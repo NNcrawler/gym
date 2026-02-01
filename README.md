@@ -184,6 +184,18 @@ gym sync
 
 ---
 
+### Find drifting skills
+
+```
+gym drift
+```
+
+* Run from the project root
+* Checks the current project against the central repository
+* Lists only drifting skills
+
+---
+
 ## Behavior Notes
 
 * Synchronization is one-way

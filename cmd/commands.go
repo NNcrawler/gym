@@ -185,6 +185,10 @@ func removeCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("resolve project root: %w", err)
 			}
+
+			if err != nil {
+				return err
+			}
 			projectCfg, err := loadProjectConfig(projectRoot)
 			if err != nil {
 				return err

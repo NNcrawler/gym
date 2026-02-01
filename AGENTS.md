@@ -19,7 +19,7 @@ For installation, usage, and command behavior, refer to `README.md`.
 
 The global config file is located at:
 
-~/.gym
+~/.gym.yaml
 
 Format:
 
@@ -29,6 +29,7 @@ skillRepository: /absolute/path/to/central/skills
 
 `skillRepository` points to the local directory containing all centrally stored skills.
 Each skill is a directory inside this repository.
+
 
 ---
 

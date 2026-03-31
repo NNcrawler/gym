@@ -15,6 +15,7 @@ import (
 var supportedAgents = map[string]string{
 	"kilo-code": ".kilocode/skills",
 	"codex":     ".codex/skills",
+	"pi":        ".pi/skills",
 }
 
 func listSupportedAgents() []string {
